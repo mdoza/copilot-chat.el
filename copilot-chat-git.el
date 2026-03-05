@@ -414,7 +414,7 @@ and temporarily disabling the org frontend's `create-req-fn` if active."
          (setf (copilot-chat-frontend-create-req-fn frontend)
                original-org-create-req-fn)))))
 
-;;;###autoload (autoload 'copilot-chat-insert-commit-message-when-ready "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-insert-commit-message-when-ready ()
   "Generate and insert a commit message using GitHub Copilot."
   (interactive)
@@ -500,7 +500,7 @@ DELAY is increased on each retry."
                (1+ current-retry)))
           (signal (car err) (cdr err))))))))
 
-;;;###autoload (autoload 'copilot-chat-insert-commit-message "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-insert-commit-message ()
   "Generate and insert a commit message using Copilot.
 Uses the current staged changes in git to
@@ -518,7 +518,7 @@ This function is expected to be safe to open via magit when added to
                   3
                   1))
 
-;;;###autoload (autoload 'copilot-chat-regenerate-commit-message "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-regenerate-commit-message ()
   "Regenerate and insert a new commit message using GitHub Copilot."
   (interactive)

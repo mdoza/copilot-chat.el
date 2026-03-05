@@ -13,6 +13,19 @@ This plugin allows you to chat with GitHub copilot.
 Feel free to contribute, report issues or discuss new features.
 
 * News
+** Incompatibility with copilot-emacs/copilot.el
+The [[https://github.com/copilot-emacs/copilot.el][copilot-emacs/copilot.el]] package (MELPA package: ~copilot~) now ships its own
+~copilot-chat.el~ that provides the same ~copilot-chat~ Emacs feature.  The two
+packages *cannot be loaded in the same Emacs session* because they define
+conflicting symbols in the ~copilot-chat~ namespace.
+
+- If you use ~copilot-emacs/copilot.el~ for inline completions *and* want
+  ~copilot-chat.el~'s richer chat interface, you must choose one or the other.
+- To keep using this package, uninstall the MELPA ~copilot~ package
+  (~M-x package-delete RET copilot~).
+- To switch to the built-in chat in ~copilot-emacs/copilot.el~, uninstall
+  this package (~M-x package-delete RET copilot-chat~).
+
 ** MCP server experimental support
 We use the [[https://github.com/lizqwerscott/mcp.el][mcp.el]] package to support MCP servers. Configure it and run ~copilot-chat-set-mcp-servers~. It seems to work better with Claude models. Feedback is welcome.
 
