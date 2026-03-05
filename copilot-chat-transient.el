@@ -32,7 +32,7 @@
 (require 'copilot-chat-command)
 (require 'copilot-chat-mcp)
 
-;;;###autoload (autoload 'copilot-chat-transient "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat-transient "copilot-chat-transient" nil t)
 (transient-define-prefix
  copilot-chat-transient () "Copilot chat command menu."
  [["Commands"
@@ -58,7 +58,7 @@
    ("b" "Buffers" copilot-chat-transient-buffers)
    ("c" "Code helpers" copilot-chat-transient-code)]])
 
-;;;###autoload (autoload 'copilot-chat-transient-buffers "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat-transient-buffers "copilot-chat-transient" nil t)
 (transient-define-prefix
  copilot-chat-transient-buffers () "Copilot chat buffers menu."
  [["Buffers"
@@ -73,7 +73,7 @@
    ("c" "Clear buffers" copilot-chat-list-clear-buffers)
    ("q" "Quit" transient-quit-one)]])
 
-;;;###autoload (autoload 'copilot-chat-transient-code "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat-transient-code "copilot-chat-transient" nil t)
 (transient-define-prefix
  copilot-chat-transient-code () "Copilot chat code helpers menu."
  [["Code helpers"
@@ -141,7 +141,7 @@
       (setf (copilot-chat-mcp-servers instance) servers)))
     (copilot-chat--activate-mcp-servers instance)))
 
-;;;###autoload (autoload 'copilot-chat-mcp-servers-transient "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat-mcp-servers-transient "copilot-chat-transient" nil t)
 (transient-define-prefix
  copilot-chat-mcp-servers-transient () "Copilot chat MCP servers menu."
  ["MCP servers:"
@@ -154,7 +154,7 @@
    ("RET" "Validate" copilot-chat--mcp-handle-selection)
    ("q" "Cancel" transient-quit-one)]])
 
-;;;###autoload (autoload 'copilot-chat-set-mcp-servers "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat-set-mcp-servers "copilot-chat-transient" nil t)
 (defalias 'copilot-chat-set-mcp-servers 'copilot-chat-mcp-servers-transient)
 
 (provide 'copilot-chat-transient)

@@ -33,10 +33,39 @@
 
 ;; Add the ability to chat with github copilot
 
+;;; Compatibility Note:
+;;
+;; The `copilot-emacs/copilot.el' package (MELPA package name: copilot) also
+;; ships a file called `copilot-chat.el' that provides the same `copilot-chat'
+;; Emacs feature.  Loading both packages in the same Emacs session will cause
+;; namespace conflicts.  If you use `copilot-emacs/copilot.el', you must
+;; uninstall `chep/copilot-chat.el' (MELPA package name: copilot-chat), and
+;; vice versa.  See the README for details.
+
 ;;; Code:
 
-;; All modules are loaded at the top level except those that are loaded lazily or for development.
-;; Lazy-loaded stuff is `copilot-chat-markdown', `copilot-chat-org', `copilot-chat-shell-maker'.
+;; Detect conflict with copilot-emacs/copilot.el's copilot-chat.el.
+;; That package provides the same `copilot-chat' Emacs feature but defines a
+;; different, incompatible set of symbols.  If it was loaded before us, signal
+;; a clear error rather than silently misbehaving.
+(when (and (featurep 'copilot-chat)
+           (not (fboundp 'copilot-chat-display)))
+  (error
+   (concat
+    "copilot-chat namespace conflict detected.\n"
+    "copilot-emacs/copilot.el's copilot-chat.el has already been loaded.\n"
+    "These two packages cannot coexist in the same Emacs session.\n"
+    "Please uninstall either 'copilot' (copilot-emacs) "
+    "or 'copilot-chat' (chep/copilot-chat.el).")))
+
+;; All modules are loaded at the top level except those that are loaded lazily
+;; or for development.
+;; Lazy-loaded stuff is `copilot-chat-markdown', `copilot-chat-org',
+;; `copilot-chat-shell-maker'.  The `copilot-chat-frontend' and
+;; `copilot-chat-backend' defcustoms (which trigger lazy loading of those
+;; modules) are defined in `copilot-chat-command', so that the package works
+;; correctly even when entered via autoloads rather than an explicit
+;; `(require 'copilot-chat)'.
 (require 'copilot-chat-body)
 (require 'copilot-chat-command)
 (require 'copilot-chat-common)
@@ -51,32 +80,6 @@
 (require 'copilot-chat-prompt-mode)
 (require 'copilot-chat-spinner)
 (require 'copilot-chat-transient)
-
-(defcustom copilot-chat-frontend 'org
-  "Frontend to use with `copilot-chat'.  Can be org, markdown or shell-maker."
-  :type
-  '(choice
-    (const :tag "org-mode" org)
-    (const :tag "markdown" markdown)
-    (const :tag "shell-maker" shell-maker))
-  :set
-  (lambda (symbol value)
-    (set-default-toplevel-value symbol value)
-    (pcase value
-      (`org (require 'copilot-chat-org))
-      (`markdown (require 'copilot-chat-markdown))
-      (`shell-maker (require 'copilot-chat-shell-maker))))
-  :group 'copilot-chat)
-
-(defcustom copilot-chat-backend 'curl
-  "Copilot chat backend.  Can be `curl` or a custom on."
-  :type '(choice (const :tag "curl" curl) (const :tag "request" request))
-  :set
-  (lambda (symbol value)
-    (set-default-toplevel-value symbol value)
-    (pcase value
-      (`curl (require 'copilot-chat-curl))))
-  :group 'copilot-chat)
 
 (provide 'copilot-chat)
 ;;; copilot-chat.el ends here

@@ -58,6 +58,32 @@ If nil, show absolute path."
   :type 'string
   :group 'copilot-chat)
 
+(defcustom copilot-chat-frontend 'org
+  "Frontend to use with `copilot-chat'.  Can be org, markdown or shell-maker."
+  :type
+  '(choice
+    (const :tag "org-mode" org)
+    (const :tag "markdown" markdown)
+    (const :tag "shell-maker" shell-maker))
+  :set
+  (lambda (symbol value)
+    (set-default-toplevel-value symbol value)
+    (pcase value
+      (`org (require 'copilot-chat-org))
+      (`markdown (require 'copilot-chat-markdown))
+      (`shell-maker (require 'copilot-chat-shell-maker))))
+  :group 'copilot-chat)
+
+(defcustom copilot-chat-backend 'curl
+  "Copilot chat backend.  Can be `curl` or a custom on."
+  :type '(choice (const :tag "curl" curl) (const :tag "request" request))
+  :set
+  (lambda (symbol value)
+    (set-default-toplevel-value symbol value)
+    (pcase value
+      (`curl (require 'copilot-chat-curl))))
+  :group 'copilot-chat)
+
 ;; Faces
 (defface copilot-chat-list-selected-buffer-face
   '((t :inherit font-lock-keyword-face))
@@ -112,7 +138,7 @@ to Copilot for processing."
         (setf (copilot-chat-prompt-history-position instance) nil)
         (copilot-chat--ask instance prompt 'copilot-chat-prompt-cb)))))
 
-;;;###autoload (autoload 'copilot-chat-ask-and-insert "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-ask-and-insert ()
   "Send to Copilot a custom prompt and insert answer in current buffer at point."
   (interactive)
@@ -136,42 +162,42 @@ BEG and END are the beginning and end positions of the region to explain."
       (cdr (assoc prompt (copilot-chat--prompts)))
       (copilot-chat--format-code code)))))
 
-;;;###autoload (autoload 'copilot-chat-explain "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-explain (beg end)
   "Ask Copilot to explain the current selected code.
 BEG and END are the beginning and end positions of the region to explain."
   (interactive "r")
   (copilot-chat--ask-region 'explain beg end))
 
-;;;###autoload (autoload 'copilot-chat-review "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-review (beg end)
   "Ask Copilot to review the current selected code.
 BEG and END are the beginning and end positions of the region to review."
   (interactive "r")
   (copilot-chat--ask-region 'review beg end))
 
-;;;###autoload (autoload 'copilot-chat-doc "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-doc (beg end)
   "Ask Copilot to write documentation for the current selected code.
 BEG and END are the beginning and end positions of the region to document."
   (interactive "r")
   (copilot-chat--ask-region 'doc beg end))
 
-;;;###autoload (autoload 'copilot-chat-fix "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-fix (beg end)
   "Ask Copilot to fix the current selected code.
 BEG and END are the beginning and end positions of the region to fix."
   (interactive "r")
   (copilot-chat--ask-region 'fix beg end))
 
-;;;###autoload (autoload 'copilot-chat-optimize "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-optimize (beg end)
   "Ask Copilot to optimize the current selected code.
 BEG and END are the beginning and end positions of the region to optimize."
   (interactive "r")
   (copilot-chat--ask-region 'optimize beg end))
 
-;;;###autoload (autoload 'copilot-chat-test "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-test (beg end)
   "Ask Copilot to generate test for the current selected code.
 BEG and END are the beginning and end positions of the region to test."
@@ -214,7 +240,7 @@ Argument CODE is the code to be formatted."
         (funcall format-fn code (copilot-chat--get-language))
       code)))
 
-;;;###autoload (autoload 'copilot-chat-explain-symbol-at-line "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-explain-symbol-at-line ()
   "Ask Copilot to explain symbol under point.
 Given the code line as background info."
@@ -231,7 +257,7 @@ Given the code line as background info."
          symbol (copilot-chat--format-code line))))
     (copilot-chat--insert-and-send-prompt instance prompt)))
 
-;;;###autoload (autoload 'copilot-chat-explain-defun "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-explain-defun ()
   "Mark current function definition and ask Copilot to explain it, then unmark."
   (interactive)
@@ -240,7 +266,7 @@ Given the code line as background info."
     (call-interactively 'copilot-chat-explain)
     (deactivate-mark)))
 
-;;;###autoload (autoload 'copilot-chat-custom-prompt-function "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-custom-prompt-function ()
   "Mark current function and ask `copilot-chat' with custom prompt."
   (interactive)
@@ -249,14 +275,14 @@ Given the code line as background info."
     (copilot-chat-custom-prompt-selection)
     (deactivate-mark)))
 
-;;;###autoload (autoload 'copilot-chat-review-whole-buffer "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-review-whole-buffer ()
   "Mark whole buffer, ask Copilot to review it, then unmark.
 It can be used to review the magit diff for my change, or other people's"
   (interactive)
   (save-excursion (copilot-chat-review (point-min) (point-max))))
 
-;;;###autoload (autoload 'copilot-chat-switch-to-buffer "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-switch-to-buffer ()
   "Switch to Copilot Chat buffer.
 Side by side with the current code editing buffer."
@@ -266,7 +292,7 @@ Side by side with the current code editing buffer."
       (switch-to-buffer-other-window (copilot-chat--get-buffer instance))))
   (copilot-chat-goto-input))
 
-;;;###autoload (autoload 'copilot-chat-custom-prompt-selection "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-custom-prompt-selection (&optional custom-prompt)
   "Send to Copilot a custom prompt followed by the current selected code/buffer.
 If CUSTOM-PROMPT is provided, use it instead of reading from the mini-buffer."
@@ -281,7 +307,7 @@ If CUSTOM-PROMPT is provided, use it instead of reading from the mini-buffer."
           (concat prompt "\n" (copilot-chat--format-code code))))
     (copilot-chat--insert-and-send-prompt instance formatted-prompt)))
 
-;;;###autoload (autoload 'copilot-chat-custom-prompt-mini-buffer "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-custom-prompt-mini-buffer ()
   "Read a string with Helm completion, showing historical inputs."
   (interactive)
@@ -297,7 +323,7 @@ If CUSTOM-PROMPT is provided, use it instead of reading from the mini-buffer."
     (let ((input (read-string prompt nil 'copilot-chat--prompt-history 0)))
       (copilot-chat--insert-and-send-prompt instance input))))
 
-;;;###autoload (autoload 'copilot-chat-list "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-list ()
   "Open Copilot Chat list buffer."
   (interactive)
@@ -308,7 +334,7 @@ If CUSTOM-PROMPT is provided, use it instead of reading from the mini-buffer."
     (copilot-chat-list-refresh instance)
     (switch-to-buffer buffer)))
 
-;;;###autoload (autoload 'copilot-chat-display "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-display (&optional arg)
   "Display copilot chat buffer.
 With prefix argument, explicitly ask for which instance to use.
@@ -320,10 +346,10 @@ Optional argument ARG if non-nil, force instance selection."
            (copilot-chat--current-instance))))
     (copilot-chat--display instance)))
 
-;;;###autoload (autoload 'copilot-chat "copilot-chat" nil t)
+;;;###autoload (autoload 'copilot-chat "copilot-chat-command" nil t)
 (defalias 'copilot-chat 'copilot-chat-display)
 
-;;;###autoload (autoload 'copilot-chat-hide "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-hide ()
   "Hide copilot chat buffer."
   (interactive)
@@ -756,7 +782,7 @@ wait for the fetch to complete."
                   (sit-for 0.1)))
               (copilot-chat--get-model-choices-with-wait))))))))
 
-;;;###autoload (autoload 'copilot-chat-set-model "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-set-model (model)
   "Set the Copilot Chat model to MODEL for the current instance.
 Fetches available models from the API if not already fetched."
@@ -821,7 +847,7 @@ Argument INSTANCE is the copilot chat instance to use."
                (copilot-chat-frontend-yank-fn (copilot-chat--get-frontend))))
     (funcall yank-fn instance)))
 
-;;;###autoload (autoload 'copilot-chat-clear-auth-cache "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-clear-auth-cache ()
   "Clear the auth cache for Copilot Chat."
   (interactive)
@@ -836,7 +862,7 @@ Argument INSTANCE is the copilot chat instance to use."
   (message "Auth cache cleared.")
   (setq copilot-chat--connection (copilot-chat-connection--make)))
 
-;;;###autoload (autoload 'copilot-chat-reset-models "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-reset-models ()
   "Reset model cache and fetch models again.
 This is useful when GitHub adds new models or updates model capabilities.
@@ -913,7 +939,7 @@ displaying a file in the instance directory will be added."
      (aio-await (copilot-chat--add-workspace instance nil))
      (copilot-chat-list-refresh instance))))
 
-;;;###autoload (autoload 'copilot-chat-kill-instance "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-kill-instance ()
   "Interactively kill a selected copilot chat instance.
 All its associated buffers are killed."
@@ -922,7 +948,7 @@ All its associated buffers are killed."
     (when instance
       (copilot-chat--kill-instance instance))))
 
-;;;###autoload (autoload 'copilot-chat-set-commit-model "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-set-commit-model (model)
   "Set the model to use specifically for commit message generation to MODEL."
   (interactive (let* ((choices (copilot-chat--get-model-choices-with-wait))
@@ -959,7 +985,7 @@ All its associated buffers are killed."
           (or model copilot-chat-default-model)))
   (message "Commit message model set to %s" model))
 
-;;;###autoload (autoload 'copilot-chat-save "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-save ()
   "Save an instance to a file."
   (interactive)
@@ -985,7 +1011,7 @@ All its associated buffers are killed."
         (setf (copilot-chat-file-path instance) file)
         (message "Saved instance to %s" file)))))
 
-;;;###autoload (autoload 'copilot-chat-load "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-load ()
   "Load an instance from a file."
   (interactive)
@@ -994,13 +1020,13 @@ All its associated buffers are killed."
     (copilot-chat--load-instance file)
     (message "Loaded instance from %s" file)))
 
-;;;###autoload (autoload 'copilot-chat-quotas "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-quotas ()
   "Display the current Copilot Chat quotas."
   (interactive)
   (copilot-chat--quotas))
 
-;;;###autoload (autoload 'copilot-chat-cancel "copilot-chat" nil t)
+;;;###autoload
 (defun copilot-chat-cancel ()
   "Cancel the current Copilot Chat request."
   (interactive)
