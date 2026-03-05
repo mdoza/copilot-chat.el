@@ -75,7 +75,7 @@ If nil, show absolute path."
   :group 'copilot-chat)
 
 (defcustom copilot-chat-backend 'curl
-  "Copilot chat backend.  Can be `curl` or a custom on."
+  "Copilot chat backend.  Can be `curl` or a custom one."
   :type '(choice (const :tag "curl" curl) (const :tag "request" request))
   :set
   (lambda (symbol value)
