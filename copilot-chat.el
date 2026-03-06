@@ -1,4 +1,4 @@
-;;; copilot-chat.el --- Copilot chat interface -*- lexical-binding: t -*-
+;;; copilot-chat.el --- Copilot chat interface -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024  copilot-chat maintainers
 
